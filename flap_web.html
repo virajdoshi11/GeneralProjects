@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+<title>Flappy Bird</title>
+</head>
+<body>
+
+
+<img id="pic" src="bg.png" width="0" height="0">
+<img id="pic_2" src="foregd.png" width="0" height="0">
+<img id="pic_3" src="bird.png" width="0" height="0">
+<img id="pic_4" src="pipedown.png" width="0" height="0">
+<img id="pic_5" src="pipeup.png" width="0" height="0">
+
+<img id="pic_7" src="trex.png" width="0" height="0">
+
+<canvas id="canvas" width="288" height="512" style="border: 2px solid #d3d3d3;"></canvas>
+
+<button onclick="fuct()">Click to play</button>
+
+<script>
+
+var cvs = document.getElementById("canvas");
+var ctx = cvs.getContext("2d");
+ctx.fillStyle = "black";
+ctx.font = "bold 16px Arial";
+
+var bg = document.getElementById("pic");
+var foregd = document.getElementById("pic_2");
+
+var bird = document.getElementById("pic_3");
+
+var pipedown = document.getElementById("pic_4");
+var pipeup = document.getElementById("pic_5");
+var pipedown_2 = document.getElementById("pic_4");
+var pipeup_2 = document.getElementById("pic_5");
+
+var button = document.getElementById("bt");
+pipedown.height = 300;
+pipedown.width = 70;//250;
+pipedown_2.height = 300;
+pipedown_2.width = 70;//250;
+
+pipeup.height = 300;
+pipeup.width = 70;//250;
+pipeup_2.height = 300;//267
+pipeup_2.width = 70;//250;
+
+foregd.width = cvs.width;
+foregd.height = 110;
+
+bird.width = 250;
+bird.height = 250;
+bird.style.display = "none";
+pipeup.style.display = "none";
+pipedown.style.display = "none";
+foregd.style.display = "none";
+	
+var constant = pipedown.height + 85;		//85 is gap
+var gravity = 1;
+var bx = 10;
+var by = 150;
+var j = 0;
+var x = cvs.width/2;
+var y = -Math.random()*130;
+var x_2 = cvs.width/2;
+var y_2 = -Math.random()*130;
+var count = 0;
+var c = 0;
+var score = 0;
+
+function run()
+{	//optical encoder for precise readings & hall effect encoder for not precise readings
+
+	ctx.fillText("Score = "+ score, (cvs.width/2)+55, 30);
+	
+	if(x < 0)
+	{
+		ctx.drawImage(pipedown_2, x_2, y_2);
+		ctx.drawImage(pipeup_2, x_2, y_2+constant);
+		x_2--;
+	}
+		
+	if(x < -cvs.width/2)
+	{
+		x = x_2;
+		y = y_2;
+		x_2 = cvs.width/2 + 30;
+		y_2 = -Math.random()*112;
+		if(count == 0)
+		{
+			score++;
+		}
+	}
+
+	if(x < bx-40 && x > bx-40-pipedown.width && count==0 && (by < bird.height/2+pipedown.height/2+y-60 || by > y+constant-50))
+	{
+		document.write("game over ");
+		count = 1;
+	}
+
+	if(by > 340 && c == 0)
+	{
+		document.write("game over ");
+		c = 1;
+	}
+
+	by += 1+j;
+	j += 0.2;
+	if(j > 7)
+	{j = 7;
+	}
+}
+
+function fuct(){
+	
+	document.addEventListener("keydown", moveUp);
+
+	function moveUp(e){
+		if(e.keyCode == 38)
+		{
+			by -= 55;
+			j = 0;
+		}
+	}
+
+	function draw(){
+		ctx.drawImage(bg, 0, 0);
+		ctx.drawImage(pipedown, x, y);
+		ctx.drawImage(pipeup, x, y+constant);
+		ctx.drawImage(bird, bx, by, 100, 100);
+		run();
+		ctx.drawImage(foregd, 0, 400);
+
+		x--;
+		
+		requestAnimationFrame(draw);
+	}
+	draw();
+}
+
+</script>
+
+</body>
+
+</html> 
