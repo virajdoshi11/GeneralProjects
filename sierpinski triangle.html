@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html>
+
+  <body>
+    <canvas id="cvs" width="700" height="500" style="border: 1px solid #000000"></canvas>
+    <script>
+	var cvs = document.getElementById("cvs");
+	var ctx = cvs.getContext("2d");
+
+	function triangle(ax, ay, bx, by, cx, cy, depth) {
+		if(depth > 0) {
+			var pax = (bx + cx)/2;
+			var pay = (by + cy)/2;
+		
+			var pbx = (ax + cx)/2;
+			var pby = (ay + cy)/2;
+
+			var pcx = (ax + bx)/2;
+			var pcy = (ay + by)/2;
+
+			var depth2 = depth-1;
+
+			triangle(pax, pay, pbx, pby, cx, cy, depth2);
+			triangle(ax, ay, pbx, pby, pcx, pcy, depth2);
+			triangle(pax, pay, bx, by, pcx, pcy, depth2);
+		}
+		else {
+			ctx.beginPath();
+			ctx.moveTo(ax, ay);
+			ctx.lineTo(bx, by);
+			ctx.lineTo(cx, cy);
+			ctx.lineTo(ax, ay);
+			ctx.stroke();
+		}
+	}
+
+	function draw(size, depth) {
+		var width = cvs.width;
+		var height = cvs.height;
+
+		var ri = (size/6)*Math.sqrt(3);
+		var ru = (size/3)*Math.sqrt(3);
+
+		var ax = width/2 - size/2;
+		var ay = height/2 + ri;
+
+		var bx = width/2 + size/2;
+		var by = height/2 + ri;
+
+		var cx = width/2;
+		var cy = height/2 - ru;
+
+		triangle(ax, ay, bx, by, cx, cy, depth);
+	}
+
+	draw(300, 4);
+    </script>
+  </body>
+
+</html>

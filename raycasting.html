@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title> Raycasting </title>
+  </head>
+
+  <body style="margin: 0px">
+    <canvas id="canvas" width="750" height="500" style="border:2px solid #000"></canvas>
+
+    <p><input type="range" min="1" max="12" value="1" id="range">
+       no. of rays: <span id="val"></span>
+    </p>
+
+    <p> <input type="range" min="1" max="360" value="45" id="range_2">
+        field of view: <span id="val_2"></span>
+    </p>
+
+    <p> Use Right/Left Arrow to rotate light </p>
+
+    <script>
+	const cvs = document.getElementById("canvas");
+	var ctx = cvs.getContext("2d");
+
+	var mx, my;
+	var i;
+	var angle = 40;
+	var nrays = 5;
+	var fov = 45;
+
+	var slider = document.getElementById("range");
+	var output = document.getElementById("val");
+	output.innerHTML = slider.value;
+
+	var slider_2 = document.getElementById("range_2");
+	var output_2 = document.getElementById("val_2");
+	output_2.innerHTML = slider.value;
+	
+	cvs.addEventListener("mousemove", mouseCor);
+	document.addEventListener("keydown", rotate)
+
+	function mouseCor(e) {
+		mx = e.x;	
+		my = e.y;
+	}
+
+	slider.oninput = function() {
+		output.innerHTML = this.value;
+		nrays = 13 - Number(this.value);
+		if(nrays === 2) { console.log(nrays); }
+	}
+
+	slider_2.oninput = function() {
+		output_2.innerHTML = this.value;
+		fov = Number(this.value);
+	}
+
+	function createVector(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+
+	function dist(x1, y1, x2, y2) {
+		return Math.sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+	}
+
+	function rotate(e) {
+		if(e.keyCode == 39) {
+			angle += 1;
+		}
+		if(e.keyCode == 37) {
+			angle -= 1;
+		}
+	}
+
+	function Boundary(x1, y1, x2, y2) {
+		this.x1 = x1;
+		this.y1 = y1;
+		this.x2 = x2;
+		this.y2 = y2;
+	
+		this.show = function() {
+			ctx.beginPath();
+			ctx.moveTo(this.x1, this.y1);	
+			ctx.lineTo(this.x2, this.y2);
+			ctx.lineWidth = 2;
+			ctx.stroke();
+		}
+	}
+
+	var wall = new Boundary(300, 100, 300, 300);
+	var walls = new Array(8);
+	for(i = 0;i < 4;i++) {
+		walls[i] = new Boundary(Math.random()*400+100, 
+					Math.random()*400+100,
+					Math.random()*400+100,
+					Math.random()*400+100);
+	}
+	walls[4] = new Boundary(0, 0, 0, cvs.height);
+	walls[5] = new Boundary(0, 0, cvs.width, 0);
+	walls[6] = new Boundary(0, cvs.height, cvs.width, cvs.height);
+	walls[7] = new Boundary(cvs.width, cvs.height, cvs.width, 0);
+	
+	function Particle() {
+		
+		this.show = function(x, y) {
+			ctx.beginPath();
+			ctx.arc(x, y, 4, 0, 2*Math.PI);
+			ctx.fillStyle = "black";
+			ctx.fill();
+		}
+		
+		this.emit = function(x, y, angle) {
+			ctx.beginPath();
+			ctx.moveTo(x, y);
+			ctx.lineTo(x + 50*Math.sin( Math.PI*angle/180 ), y + 50*Math.cos( Math.PI*angle/180 ));
+			ctx.lineWidth = 1;
+			ctx.stroke();
+		}
+
+		this.emit_2 = function(x1, y1, x2, y2) {
+			ctx.beginPath();
+			ctx.moveTo(x1, y1);
+			ctx.lineTo(x2, y2);
+			ctx.lineWidth = 1;
+			ctx.stroke();
+		}
+
+		this.cast = function( wall, mx, my, angle ) {
+			const x1 = wall.x1;
+			const y1 = wall.y1;
+			const x2 = wall.x2;
+			const y2 = wall.y2;
+
+			const x3 = mx;
+			const y3 = my;
+			const x4 = mx + Math.sin( Math.PI*angle/180 );
+			const y4 = my + Math.cos( Math.PI*angle/180 );
+			
+			const den = (x1 - x2)*(y3 - y4)-(y1 - y2)*(x3 - x4);
+			if(den == 0) {
+				return;
+			}
+			const t = ((x1 - x3)*(y3 - y4)-(y1 - y3)*(x3 - x4))/den;
+			const u = -((x1 - x2)*(y1 - y3)-(y1 - y2)*(x1 - x3))/den;
+
+			if(t > 0 && t < 1 && u > 0) {
+				const pt = new createVector();
+				pt.x = x1 + t*(x2 - x1);
+				pt.y = y1 + t*(y2 - y1);
+				return pt;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	var particle = new Particle();
+
+	function loop() {
+		ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+		for(var i = 0;i < walls.length;i++) {
+			walls[i].show();
+		}
+
+		for(var a = angle;a < angle+fov ;a += nrays) {
+			var closest = null;
+			var record = 20000;
+			for(var i = 0;i < walls.length;i++) {
+				var pt = particle.cast( walls[i], mx, my, a );
+				if(pt) {
+					var d = dist(mx, my, pt.x, pt.y);
+					if(d < record) {
+						closest = pt;
+						record = d;
+					}
+				}
+			}
+			if(closest) {
+				particle.emit_2(mx, my, closest.x, closest.y);
+			}
+		}
+	
+		requestAnimationFrame(loop);
+	}
+	loop();	
+    </script>
+  </body>
+
+</html>

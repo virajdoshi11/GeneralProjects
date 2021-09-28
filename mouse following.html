@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title> A* algorithm </title>
+  </head>
+
+  <body>
+    <canvas id="canvas" width="750" height="500" style="border: 2px solid #000"></canvas>
+    <canvas id="cvs" width="750" height="500" style="border: 2px solid #000"><canvas>
+    <script>
+	var cvs = document.getElementById("canvas");
+	var ctx = cvs.getContext("2d");
+	var mx = 0;
+	var my = 0;
+	var ex;
+	var cx = 0;
+	var ey;
+	var cy = 0;
+
+	cvs.addEventListener("mousemove", mouse);
+	
+	function mouse(e) {
+		mx = e.x;
+		my = e.y;
+	}
+
+	function Circle(x, y) {
+		ctx.beginPath();
+		ctx.arc( x, y, 20, 0, 2*Math.PI );
+		ctx.lineWidth = 2;
+		ctx.stroke();
+		ctx.fillStyle = "rgba(180, 180, 180, 0.8)";
+		ctx.fill();
+	}
+	
+	function Triangle(x, y) {
+		ctx.beginPath();
+		ctx.moveTo(x, y);
+		ctx.lineTo(x+15, y+10);
+		ctx.lineTo(x+15, y-10);
+		ctx.fillStyle = "black";
+		ctx.fill();
+		ctx.stroke();
+	}
+
+	function loop() {
+		ctx.clearRect(0, 0, cvs.width, cvs.height);
+		Circle(mx-9, my-9);
+		Triangle(cx-9, cy-9);
+		ex = 0.02*(mx - cx);
+		ey = 0.02*(my - cy);
+		cx += ex;
+		cy += ey;
+		requestAnimationFrame(loop);
+	}
+	loop(); 	
+
+    </script>
+
+    <script>
+	const cvs_2 = document.getElementById("cvs");
+	var ctx_2 = cvs_2.getContext("2d");
+	var x = 0;
+	
+	var angle = 0;
+	var hx = 20, hy = 50;
+	var offset = 0;
+	
+	function Rect(x, y, hx, hy) {
+		ctx_2.beginPath();
+		ctx_2.moveTo(x, y);
+		ctx_2.lineTo(x+hx, y);
+		ctx_2.lineTo(x+hx, y-hy);
+		ctx_2.lineTo(x, y-hy);
+		ctx_2.lineTo(x, y);
+
+		ctx_2.lineTo(x, y);
+		ctx_2.lineTo(x+hx, y);
+		ctx_2.lineTo(x+hx, y+hy);
+		ctx_2.lineTo(x, y+hy);
+		ctx_2.lineTo(x, y);
+		ctx_2.stroke();
+		ctx_2.fillStyle = "black";
+		ctx_2.fill();
+	}
+	
+	function loop_2() {
+		ctx_2.clearRect(0, 0, cvs_2.width, cvs_2.height);
+		for(i = 0;i < cvs_2.width;i++) {
+			angle += i/35 + 21;	//try angle = i/35 +20, i/35 + 80
+			hy = 50*Math.sin( angle*Math.PI/180 ) + 50;
+			Rect(i*25, cvs_2.height/2, hx, hy);
+			//angle += 0.05;	//try angle = i/35 +20, i/35 + 80
+			//offset += 0.01;
+		}
+		//angle += 2;
+		requestAnimationFrame(loop_2);
+	}
+	loop_2();
+    </script>
+  </body>
+
+</html>
